@@ -3,6 +3,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import SignIn from "../SignIn/SignIn";
 import { auth, } from "../../firebase";
 import CreateNewGroupChat from "./components/CreateNewGroupChat";
+import ListGroupChat from "./components/ListGroupChat";
 
 export default function Homepage() {
     const [user] = useAuthState(auth);
@@ -15,12 +16,13 @@ export default function Homepage() {
     // console.log('auth');
     // console.log(auth?.currentUser);
     // const { uid, photoURL } = auth?.currentUser;
-    const { uid, photoURL } = user;
+    // const { uid, photoURL } = user;
   
     // display list of group chat that have this current user in side ( member or the host)
     return (
-      <div>
-        < CreateNewGroupChat />
+      <div className=''>
+        <CreateNewGroupChat />
+        <ListGroupChat />
       </div>
     )
   }

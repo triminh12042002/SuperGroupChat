@@ -10,6 +10,7 @@ import ChatMessage from './components/ChatMessage';
 import SignOut from '../SignOut/SignOut';
 
 import { auth, firestore } from '../../firebase'
+import GetYourID from './GetYourID';
 
 export default function ChatRoom() {
     const { id: groupID } = useParams();
@@ -61,7 +62,8 @@ export default function ChatRoom() {
             </div>
             <div className='border'>
                 <SignOut />
-                < AddNewMemberToGroupChat groupID={groupID} />
+                <AddNewMemberToGroupChat groupID={groupID} />
+                <GetYourID />
             </div>
         </div>
 

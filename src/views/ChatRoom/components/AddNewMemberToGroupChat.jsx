@@ -21,7 +21,7 @@ export default function AddNewMemberToGroupChat({ groupID }) {
     return (
         <div>
             <form className='m-2 flex flex-col'>
-                <input value={newUID} onChange={(e) => setNewUID(e.target.value)} placeholder='member uid' />
+                <input value={newUID} onChange={(e) => setNewUID(e.target.value)} placeholder='member ID' />
                 <button onClick={addNewMember}>Add new member</button>
             </form>
         </div>
