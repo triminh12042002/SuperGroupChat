@@ -15,6 +15,7 @@ wss.on('connection', ws => {
     });
 
     ws.on('close', message => {
+        console.log(message)
         handleMessage({event: 'room', action: 'leave'}, ws);
     })
 });

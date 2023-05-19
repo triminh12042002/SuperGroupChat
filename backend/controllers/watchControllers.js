@@ -1,7 +1,7 @@
 const {EVENTS, Rooms} = require('../models/roomModel')
 const handleRoomEvent = require('./roomControllers')
 const handleSyncEvent = require('./syncControllers')
-
+const handleControllerEvent = require('./controlController')
 // {
 //     event, action, roomID, userID, payload
 // }
@@ -17,4 +17,4 @@ const handleMessage = (req, ws) => {
         handleControllerEvent(req, ws);
 }
 
-module.exports =  {handleMessage }
+module.exports =  {handleMessage}

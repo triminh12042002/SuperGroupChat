@@ -8,12 +8,11 @@ let socket
 function Watch(props) {
   const [videoId, setVideoId] = useState('00vnln25HBg')
   const [inputVideoId, setinputVideoId] = useState('')
-  socket = new WebSocket("ws://localhost:8080")
+  const [controller, setController] = useState('guest')
+  const [onlineList, setOnlineList] = useState([])
 
-  //test code
-  const userId = Math.floor(Math.random() * 100);
-  const { id: roomId } = useParams();
-  console.log(userId, roomId)
+
+  socket = new WebSocket("ws://localhost:8080")
 
   useEffect(()=>{
     if(!window.YT){
@@ -31,21 +30,36 @@ function Watch(props) {
     // test code
     socket.onopen = () => {
       console.log("connection establish")
-      socket.send(JSON.stringify({event: 'room', action: 'join', roomId, userId, userName: 'huy'}));
+      socket.send(JSON.stringify({event: 'room', action: 'join', roomId: props.roomId, userId: props.userId, userName: 'huy'}));
         
+      // receive response
         socket.addEventListener('message', event => {
           let res = JSON.parse(event.data);
           console.log('Incoming response', res)
-          updateVideo(res)
+          handleResponse(res)
           });
     }
 
     socket.onclose = () => {
+      socket.send(JSON.stringify({event: 'close', action: 'leave', roomId: props.roomId, userId: props.userId, msg: 'close from client'}));
       console.log('Websocket Disconnected');
-      // socket.send(JSON.stringify({event: 'close', action: 'leave', roomId, userId, msg: 'close from client'}));
     }
   }, [])
+  
+  // Handle all type of responses
+  const handleResponse = res => {
+    if(res.event == 'sync'){
+      updateVideo(res)
+    } else if(res.event == 'control'){
+      // can be host/controller/guest
+      console.log('set controller')
+      setController(res.action)
+    } else if (res.event == 'online'){
+      setOnlineList(res.onlineList)
+    }
+  }
 
+  // Sync
   const loadVideo = () => {
     player = new window.YT.Player('player', {
       videoId: videoId,
@@ -78,8 +92,8 @@ function Watch(props) {
     socket.send(JSON.stringify({
       event: "sync",
       action: "pause",
-      roomId,
-      userId
+      roomId: props.roomId,
+      userId: props.userId
       })
     )
   };
@@ -88,8 +102,8 @@ function Watch(props) {
   const currentStatus = () => (JSON.stringify({
     event: "sync", 
     action: "currenttime",
-    roomId,
-    userId,
+    roomId: props.roomId,
+    userId: props.userId,
     currentTime: player.getCurrentTime(),
   })
   );
@@ -122,11 +136,25 @@ function Watch(props) {
         setVideoId(match[2])
         await changeVideo(match[2])
         // broadcast change videoId
-        console.log('change video 1')
-        socket.send(JSON.stringify({event: 'sync', action: 'changevideo', roomId, userId, videoId}))
-        console.log('change video 2')
+        socket.send(JSON.stringify({event: 'sync', action: 'changevideo', roomId: props.roomId, userId: props.userId, videoId}))
 
       }
+  }
+
+  // Online
+  const handleAssignController = (event) =>{
+    event.preventDefault()
+    console.log('hello')
+    const req = {
+      event: 'control',
+      action: 'assign',
+      roomId: props.roomId,
+      userId: props.userId,
+      targetUserId: event.target.getAttribute('targetUserId'),
+      controller: event.target.getAttribute('controller')
+    }
+
+    socket.send(JSON.stringify(req))
   }
 
   // api
@@ -143,6 +171,16 @@ function Watch(props) {
       <div>
         <div id="player"></div>
       </div>
+    <div >
+      {onlineList.map(({userName, userId, controller: control}) =>
+        <div>
+          <li key={userId}>{`${userName} - ${control}`}</li>
+          { (controller == 'host' && control == 'guest') && <button targetUserId={userId} controller={'controller'} onClick={handleAssignController}>Assign controller</button>}
+          { (controller == 'host' && control == 'controller') && <button targetUserId={userId} controller={'guest'} onClick={handleAssignController}>Assign guest</button>}
+
+        </div>
+      )}
+    </div>
 
       <form onSubmit={handleOnVideoIdSubmit}>
         <div>

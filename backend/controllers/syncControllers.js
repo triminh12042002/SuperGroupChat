@@ -1,10 +1,11 @@
 const {Rooms} = require('../models/roomModel')
-const {broadcastMessage} = require('../models/roomModel')
+const {broadcastMessage} = require('../utils')
 
 
 const handleSyncEvent = (req, ws)=>{
-    if(Rooms.get(req.roomId)) {
-        broadcastMessage(req, Rooms.get(req.roomId).Users, ws)
+    const {roomId, userId} = req
+    if(Rooms.get(roomId)) {
+        broadcastMessage(req, roomId, userId)
     }
 }
 

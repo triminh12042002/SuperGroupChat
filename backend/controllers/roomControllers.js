@@ -1,14 +1,14 @@
-const {ACTIONS, Rooms} = require('../models/roomModel')
-const {broadcastMessage} = require('../models/roomModel')
+const {ACTIONS, Rooms, EVENTS} = require('../models/roomModel')
+const {broadcastOnlineList} = require('../utils')
 
 setInterval(()=>{
     for(const [RoomId,Room] of Rooms){
-        console.log(RoomId, Room.Users.values())
+        console.log(RoomId, [...Room.Users.values()].map( ({userName, userId, controller}) => ({userName, userId, controller})))
     }
 }, 10000)
 
 const handleRoomEvent = (req, ws) => {
-    let action = req.action;
+    const {action} = req
     if(action === ACTIONS.JOIN)
         joinRoom(req, ws);
     else if(action === ACTIONS.LEAVE)
@@ -16,54 +16,69 @@ const handleRoomEvent = (req, ws) => {
 }
 
 const joinRoom = (req, ws) => {
+    const {userId, roomId, userName} = req
     // If room not exist -> host
     const newUser = {
-        userName: req.userName,
-        controller: true
+        userName: userName,
+        userId: userId,
+        controller: 'host',
+        ws
     }
 
-    if(!Rooms.get(req.roomId)){
-        Rooms.set(req.roomId, {
+    if(!Rooms.get(roomId)){
+        Rooms.set(roomId, {
             Users: new Map(),
         })
     }else {
-        newUser.controller = false
+        newUser.controller = 'guest'
     }
-    Rooms.get(req.roomId).Users.set(ws, newUser)
+    Rooms.get(req.roomId).Users.set(userId, newUser)
 
-    // Broadcast response
+    // update the controller of this ws
     const res = {
-        event: "join successfully"
+        event: EVENTS.VIDEO_CONTROLLER,
+        action: newUser.controller == 'host' ? ACTIONS.HOST : ACTIONS.GUEST
     }
-    console.log('hello', Rooms.get(req.roomId).Users.get(ws))
-    broadcastMessage(res, Rooms.get(req.roomId).Users, ws)
+
+    // broadcast new online list to other ws
+    ws.send(JSON.stringify(res))
+    broadcastOnlineList(req.roomId)
 }
+
 
 const leaveRoom = (ws)=>{
     console.log('leave room')
     // check if leaved user has the controller ?
-    let roomId
+    let roomId = null, userId = null
     for(let [Id, Room] of Rooms){
-        if(Room.Users.size != 0 && Room.Users.get(ws)) {
-            roomId = Id
-            break
+        for (let [key, User] of Room.Users.entries()){
+            if(User.ws == ws){
+                roomId = Id
+                userId = key
+                break
+            }
         }
+        if(!roomId) break
     }
 
     // if room not exist 
     if(!roomId) return;
-    
-    const hasControl = Rooms.get(roomId).Users.get(ws).controller == true
-    Rooms.get(roomId).Users.delete(ws)
+
+    const isHost = Rooms.get(roomId).Users.get(userId).controller == ACTIONS.HOST
+    Rooms.get(roomId).Users.delete(userId)
 
     // if no one in room, remove the room
     if(Rooms.get(roomId).Users.size == 0) Rooms.delete(roomId)
     else{ // still have users in room
-        if(hasControl) // delete user has control
-            Rooms.get(roomId).Users.values[0].controller = true // assign controller to new user
+        if(isHost) { // delete user has control
+            [...Rooms.get(roomId).Users.values()][0].controller = ACTIONS.HOST // assign controller to new user
+        }
     }
 
     // update the online section & new controller
+    broadcastOnlineList(roomId)
+    ws.close()
+    console.log('leave room completely')
 }
 
 module.exports = handleRoomEvent

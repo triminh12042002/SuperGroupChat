@@ -8,23 +8,30 @@ import { useParams } from 'react-router-dom';
 import AddNewMemberToGroupChat from './components/AddNewMemberToGroupChat';
 import ChatMessage from './components/ChatMessage';
 import SignOut from '../SignOut/SignOut';
-
+import Watch from './Watch';
 import { auth, firestore } from '../../firebase'
 import GetYourID from './GetYourID';
 
 export default function ChatRoom() {
-    const { id: groupID } = useParams();
-    // console.log('groupID')
-    // console.log(groupID)
+    const { id: roomId } = useParams();
+
+    const fetchUserId = async () => {
+        const user = firebase.auth().currentUser;
+        if (user) {
+          const uid = user.uid;
+          return uid
+        }
+      };
+
+    // const userId = firebase.auth().currentUser?.uid;
+    const userId = fetchUserId()
+    console.log('user id ',userId)
     const dummy = useRef();
-    const messageRef = firestore.collection('groups').doc(groupID).collection('messages');
-    // console.log(messageRef);
+    const messageRef = firestore.collection('groups').doc(roomId).collection('messages');
+
     const query = messageRef.orderBy('createAt');
     const [messages, loadingMessages, error] = useCollectionData(query, { idField: 'id' });
     const [formValue, setFormValue] = useState('');
-
-    // console.log(messages);
-    // console.log(error);
 
     const sendMessage = async (e) => {
         e.preventDefault();
@@ -47,6 +54,9 @@ export default function ChatRoom() {
     return (
         <div className='min-h-screen relative grid grid-cols-1s gap-2 md:grid-cols-[3fr_1fr] '>
             <div className='relative border'>
+                
+                <Watch roomId={roomId} userId={userId}></Watch>
+
                 <div  >
                     {messages && messages.map(msg => {
                         // console.log(msg);
@@ -62,7 +72,7 @@ export default function ChatRoom() {
             </div>
             <div className='border'>
                 <SignOut />
-                <AddNewMemberToGroupChat groupID={groupID} />
+                <AddNewMemberToGroupChat groupID={roomId} />
                 <GetYourID />
             </div>
         </div>
