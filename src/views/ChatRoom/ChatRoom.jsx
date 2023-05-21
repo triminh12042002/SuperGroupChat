@@ -3,7 +3,7 @@ import firebase from 'firebase/compat/app'
 
 // firebase hooks
 import { useCollectionData } from 'react-firebase-hooks/firestore'
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AddNewMemberToGroupChat from './components/AddNewMemberToGroupChat';
 import ChatMessage from './components/ChatMessage';
@@ -15,17 +15,13 @@ import GetYourID from './GetYourID';
 export default function ChatRoom() {
     const { id: roomId } = useParams();
 
-    const fetchUserId = async () => {
-        const user = firebase.auth().currentUser;
-        if (user) {
-          const uid = user.uid;
-          return uid
-        }
-      };
+    const userId = firebase.auth().currentUser?.uid;
+    const socket = new WebSocket("ws://localhost:8080")
 
-    // const userId = firebase.auth().currentUser?.uid;
-    const userId = fetchUserId()
-    console.log('user id ',userId)
+    console.log('user id at chat room', userId)
+
+
+    // console.log('user id ',userId)
     const dummy = useRef();
     const messageRef = firestore.collection('groups').doc(roomId).collection('messages');
 
@@ -55,7 +51,7 @@ export default function ChatRoom() {
         <div className='min-h-screen relative grid grid-cols-1s gap-2 md:grid-cols-[3fr_1fr] '>
             <div className='relative border'>
                 
-                <Watch roomId={roomId} userId={userId}></Watch>
+                {userId && <Watch roomId={roomId} userId={userId} socket={socket}></Watch>}
 
                 <div  >
                     {messages && messages.map(msg => {

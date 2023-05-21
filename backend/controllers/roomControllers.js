@@ -71,7 +71,12 @@ const leaveRoom = (ws)=>{
     if(Rooms.get(roomId).Users.size == 0) Rooms.delete(roomId)
     else{ // still have users in room
         if(isHost) { // delete user has control
-            [...Rooms.get(roomId).Users.values()][0].controller = ACTIONS.HOST // assign controller to new user
+            const user = [...Rooms.get(roomId).Users.values()][0]
+            user.controller = ACTIONS.HOST // assign host to new user
+            user.ws.send(JSON.stringify({
+                event: EVENTS.VIDEO_CONTROLLER,
+                action: ACTIONS.HOST
+            }))
         }
     }
 

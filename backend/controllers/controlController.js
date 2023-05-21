@@ -12,7 +12,7 @@ const assignController = (req, ws) => {
     Rooms.get(roomId).Users.get(targetUserId).controller = controller
 
     // update at client
-    ws.send(JSON.stringify({event: EVENTS.VIDEO_CONTROLLER, action: controller}))
+    Rooms.get(roomId).Users.get(targetUserId).ws.send(JSON.stringify({event: EVENTS.VIDEO_CONTROLLER, action: controller}))
 
     //broadcast
     broadcastOnlineList(roomId)
