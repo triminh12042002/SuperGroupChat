@@ -15,13 +15,10 @@ import GetYourID from './GetYourID';
 export default function ChatRoom() {
     const { id: roomId } = useParams();
 
-    const userId = firebase.auth().currentUser?.uid;
+    const {uid, displayName} = auth.currentUser;
     const socket = new WebSocket("ws://localhost:8080")
 
-    console.log('user id at chat room', userId)
-
-
-    // console.log('user id ',userId)
+    // console.log('user id ',userId)       
     const dummy = useRef();
     const messageRef = firestore.collection('groups').doc(roomId).collection('messages');
 
@@ -51,7 +48,7 @@ export default function ChatRoom() {
         <div className='min-h-screen relative grid grid-cols-1s gap-2 md:grid-cols-[3fr_1fr] '>
             <div className='relative border'>
                 
-                {userId && <Watch roomId={roomId} userId={userId} socket={socket}></Watch>}
+                {uid && <Watch roomId={roomId} userId={uid} userName={displayName} socket={socket}></Watch>}
 
                 <div  >
                     {messages && messages.map(msg => {

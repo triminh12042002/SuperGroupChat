@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef} from 'react';
 import firebase from 'firebase/compat/app'
 import { useParams } from 'react-router-dom';
+import Playlist from './Playlist';
 
 let player = null
 
@@ -14,7 +15,7 @@ function Watch(props) {
     // test code
     props.socket.onopen = () => {
       console.log("connection establish")
-      props.socket.send(JSON.stringify({event: 'room', action: 'join', roomId: props.roomId, userId: props.userId, userName: 'huy'}));
+      props.socket.send(JSON.stringify({event: 'room', action: 'join', roomId: props.roomId, userId: props.userId, userName: props.userName}));
 
       // receive response
         props.socket.addEventListener('message', event => {
@@ -187,16 +188,18 @@ function Watch(props) {
       <div>
         <div id="player"></div>
       </div>
-    <div >
-      {onlineList.map(({userName, userId, controller: control}) =>
-        <div>
-          <li key={userId}>{`${userName} - ${control} - ${userId}`}</li>
-          { (controller == 'host' && control == 'guest') && <button targetUserId={userId} controller={'controller'} onClick={handleAssignController}>Assign controller</button>}
-          { (controller == 'host' && control == 'controller') && <button targetUserId={userId} controller={'guest'} onClick={handleAssignController}>Assign guest</button>}
+       
+      <Playlist roomId={props.roomId}/>
 
-        </div>
-      )}
-    </div>
+      <div >
+        {onlineList.map(({userName, userId, controller: control}) =>
+          <div>
+            <li key={userId}>{`${userName} - ${control} - ${userId}`}</li>
+            { (controller == 'host' && control == 'guest') && <button targetUserId={userId} controller={'controller'} onClick={handleAssignController}>Assign controller</button>}
+            { (controller == 'host' && control == 'controller') && <button targetUserId={userId} controller={'guest'} onClick={handleAssignController}>Assign guest</button>}
+          </div>
+        )}
+      </div>
 
       <form onSubmit={handleOnVideoIdSubmit}>
         <div>

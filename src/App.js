@@ -22,7 +22,6 @@ function App() {
       <Route path='/' element={<Homepage />} />
       <Route path='/signin' element={<SignIn />} />
       <Route path='/groups/:id' element={<ChatRoom />} />
-      {/* <Route path='/groups/:id/watch' element={<Watch />} /> */}
     </Routes>
 
   );
