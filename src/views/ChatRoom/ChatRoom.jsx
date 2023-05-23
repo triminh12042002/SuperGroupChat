@@ -58,27 +58,31 @@ export default function ChatRoom() {
 
     // upload image
     const [imageUpload, setImageUpload] = useState(null);
-    const [imageList, setImageList] = useState([]);
+    const [latestImageName, setLatestImageName] = useState("");
+    const [lastestImage, setLatestImage] = useState(null);
     const uploadImage = () => {
         if (imageUpload) {
-            const imageRef = ref(storage, `images/${imageUpload.name + v4()}`);
+            let imageLongName = imageUpload.name + v4();
+            const imageRef = ref(storage, `images/${imageLongName}`);
             uploadBytes(imageRef, imageUpload)
             .then(() => {
-                alert("Image uploaded successfully!");
+                setLatestImageName(imageLongName);
             })
-            setImageUpload(null);
         }
     }
     const imageListRef = ref(storage, "images/");
     useEffect(() => {
         listAll(imageListRef)
         .then((response) => {
-            // response.items.forEach((item) => {
-            //     getDownloadURL(item)
-            //     .then((url) => {
-            //         setImageList(prev => [...prev, url]);
-            //     })
-            // })
+            response.items.forEach((item) => {
+                console.log(item.name);
+                if (item.name === latestImageName) {
+                    getDownloadURL(item)
+                    .then((url) => {
+                        setLatestImage(url);
+                    })
+                }
+            })
         }) 
     })
 
@@ -101,7 +105,7 @@ export default function ChatRoom() {
                     <button onClick={uploadImage}>Send</button>
                     <input type="file" className='w-auto' onChange={e => setImageUpload(e.target.files[0])} />
                     <div>
-                        {imageList.map(url => <img src={url} />)}
+                        {<img src={lastestImage} />}
                     </div>
                 </form>
             </div>
