@@ -22,14 +22,14 @@ export default function ChatRoom() {
     const fetchUserId = async () => {
         const user = firebase.auth().currentUser;
         if (user) {
-          const uid = user.uid;
-          return uid
+            const uid = user.uid;
+            return uid
         }
-      };
+    };
 
     // const userId = firebase.auth().currentUser?.uid;
     const userId = fetchUserId()
-    console.log('user id ',userId)
+    console.log('user id ', userId)
     const dummy = useRef();
     const messageRef = firestore.collection('groups').doc(roomId).collection('messages');
 
@@ -47,6 +47,7 @@ export default function ChatRoom() {
             createAt: firebase.firestore.FieldValue.serverTimestamp(),
             uid,
             photoURL,
+            imageURL: lastestImage
         })
 
         setFormValue('');
@@ -59,37 +60,40 @@ export default function ChatRoom() {
     // upload image
     const [imageUpload, setImageUpload] = useState(null);
     const [latestImageName, setLatestImageName] = useState("");
-    const [lastestImage, setLatestImage] = useState(null);
+    const [lastestImage, setLatestImage] = useState("");
+    const imageListRef = ref(storage, "images/");
+
     const uploadImage = () => {
         if (imageUpload) {
             let imageLongName = imageUpload.name + v4();
             const imageRef = ref(storage, `images/${imageLongName}`);
             uploadBytes(imageRef, imageUpload)
-            .then(() => {
-                setLatestImageName(imageLongName);
-            })
+                .then(() => {
+                    setLatestImageName(imageLongName);
+                })
+            // setImageUpload(null);
         }
     }
-    const imageListRef = ref(storage, "images/");
+    
     useEffect(() => {
         listAll(imageListRef)
-        .then((response) => {
-            response.items.forEach((item) => {
-                console.log(item.name);
-                if (item.name === latestImageName) {
-                    getDownloadURL(item)
-                    .then((url) => {
-                        setLatestImage(url);
-                    })
-                }
+            .then((response) => {
+                response.items.forEach((item) => {
+                    console.log(item.name);
+                    if (item.name === latestImageName) {
+                        getDownloadURL(item)
+                            .then((url) => {
+                                setLatestImage(url);
+                            })
+                    }
+                })
             })
-        }) 
-    })
+    }, []);
 
     return (
         <div className='min-h-screen relative grid grid-cols-1s gap-2 md:grid-cols-[3fr_1fr] '>
             <div className='relative border'>
-                
+
                 <Watch roomId={roomId} userId={userId}></Watch>
 
                 <div  >
@@ -99,14 +103,14 @@ export default function ChatRoom() {
                     })}
                     <div className='dum' ref={dummy}></div>
                 </div>
+                {/* <div>
+                    {<img src={lastestImage} />}
+                </div> */}
                 {/* <div className='p-8'>_</div> */}
                 <form className='absolute bottom-0 flex' onSubmit={sendMessage}>
                     <input value={formValue} onChange={e => setFormValue(e.target.value)} />
                     <button onClick={uploadImage}>Send</button>
                     <input type="file" className='w-auto' onChange={e => setImageUpload(e.target.files[0])} />
-                    <div>
-                        {<img src={lastestImage} />}
-                    </div>
                 </form>
             </div>
             <div className='border'>
