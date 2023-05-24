@@ -13,6 +13,7 @@ export default function AddNewMemberToGroupChat({ groupID }) {
 
     async function addNewMember(e) {
         e.preventDefault();
+
         await groupRef.update({
             users: firebase.firestore.FieldValue.arrayUnion(newUID),
         })
@@ -21,7 +22,7 @@ export default function AddNewMemberToGroupChat({ groupID }) {
     return (
         <form className='form-control'>
             <div className=" flex">
-                <a className="btn" onClick={addNewMember}>Add new member</a>
+                <button className="btn" onClick={addNewMember}>Add new member</button>
                 <input className="input input-bordered text-black" value={newUID} onChange={(e) => setNewUID(e.target.value)} placeholder='Member ID' />
             </div>
         </form>

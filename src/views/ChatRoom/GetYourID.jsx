@@ -10,8 +10,8 @@ export default function GetYourID() {
     // }, [])
 
     return (
-        <a className="normal-case text-xl">
+        <div className="normal-case text-xl">
             {currentUserUid && `uid: ${currentUserUid}`}
-        </a>
+        </div>
     )
 }

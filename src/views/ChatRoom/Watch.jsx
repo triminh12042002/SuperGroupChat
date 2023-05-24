@@ -166,20 +166,19 @@ function Watch(props) {
   }
 
   const handleSyncChangeVideo = async (id) => {
+    if(controller != 'guest' && id && id.length == 11){
       setVideoId(id)
       await changeVideo(id)
       props.socket.send(JSON.stringify({event: 'sync', action: 'changevideo', roomId: props.roomId, userId: props.userId, videoId: id}))
-  }
+    }
+    }
 
   const handleOnVideoIdSubmit = async event => {
     if(event)
       event.preventDefault();
     const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/, match = inputVideoId.match(regExp);
     
-    if(controller != 'guest' && match && match[2].length == 11){
-        handleSyncChangeVideo(match[2])
-        console.log('videoid',videoId)
-      }
+    handleSyncChangeVideo(match[2])
   }
 
   // Online
