@@ -1,0 +1,19 @@
+create virtual env:
+    python3 -m venv venv
+run:
+    source venv/bin/activate
+
+show gpu instead of single command "rocminfo" we need to locate the binary manually:
+    /opt/rocm/bin/rocminfo
+
+run fastapi server:
+    uvicorn api:app --reload
+
+kill the uvicorn server:
+    lsof -i :8000
+    kill -9 PID
+
+FireBaseChatAppIn7Minutes/superchat/StableDiffusionServer
+
+http://127.0.0.1:8000/docs
+to test api
