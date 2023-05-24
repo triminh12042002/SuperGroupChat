@@ -1,4 +1,4 @@
-
+/* 
 body {
   background-color: #84aaf5;
 }
@@ -56,8 +56,6 @@ main::-webkit-scrollbar-thumb {
 }
 
 form {
-  /* height: 10vh; */
-  /* position: fixed; */
   bottom: 0;
   background-color: rgb(24, 23, 23);
   width: 100%;
@@ -67,7 +65,6 @@ form {
 }
 
 form button {
-  /* width: 20%; */
   background-color: rgb(56, 56, 143);
 }
 
@@ -84,7 +81,7 @@ input {
 }
 
 button {
-  background-color: #282c34; /* Green */
+  background-color: #282c34;
   border: none;
   color: white;
   padding: 15px 32px;
@@ -152,60 +149,4 @@ img {
   height: 40px;
   border-radius: 50%;
   margin: 2px 5px;
-}
-
-/* test */
-.playlist {
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.playlist-title {
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.playlist-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-  padding: 10px;
-  background-color: #f5f5f5;
-  border-radius: 5px;
-}
-
-.playlist-thumbnail {
-  width: 100px;
-  height: 60px;
-  margin-right: 10px;
-  object-fit: cover;
-  border-radius: 5px;
-}
-
-.playlist-info {
-  flex-grow: 1;
-}
-
-.playlist-title {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 5px;
-}
-
-.playlist-videoId {
-  font-size: 12px;
-  color: #888888;
-}
-
-.playlist-remove-btn {
-  font-size: 12px;
-  color: #888888;
-  background-color: transparent;
-  border: none;
-  cursor: pointer;
-}
-
-.playlist-remove-btn:hover {
-  color: #ff0000;
-}
+} */

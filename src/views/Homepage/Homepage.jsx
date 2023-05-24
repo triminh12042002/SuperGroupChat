@@ -20,9 +20,13 @@ export default function Homepage() {
   
     // display list of group chat that have this current user in side ( member or the host)
     return (
-      <div className=''>
-        <CreateNewGroupChat />
-        <ListGroupChat />
+      <div className="flex flex-col items-center">
+        <div className="my-4">
+          <CreateNewGroupChat />
+        </div>
+        <div className="my-4">
+          <ListGroupChat />
+        </div>
       </div>
     )
   }

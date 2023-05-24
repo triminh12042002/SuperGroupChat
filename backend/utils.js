@@ -13,7 +13,7 @@ const broadcastOnlineList = (roomId)=>{
         const broadcastRes = {
             event: EVENTS.ONLINE,
             action: ACTIONS.ONLINE_USERS_LIST,
-            onlineList: [...Rooms.get(roomId).Users.values()].map( ({userName, userId, controller}) => ({userName, userId, controller}))
+            onlineList: [...Rooms.get(roomId).Users.values()].map( ({userName, userId, controller, photoURL}) => ({userName, userId, controller, photoURL}))
         }
         console.log(broadcastRes)
         broadcastMessage(broadcastRes, roomId, null)

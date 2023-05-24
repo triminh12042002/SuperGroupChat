@@ -2,6 +2,7 @@
 import firebase from 'firebase/compat/app'
 import 'firebase/compat/firestore'
 import 'firebase/compat/auth'
+import { getStorage } from 'firebase/storage'
 
 import { useAuthState, useSignInWithGoogle } from 'react-firebase-hooks/auth'
 // firebase hooks
@@ -29,4 +30,6 @@ const firebaseConfig = {
     auth,
     firestore,
   }
+
+  export const storage = getStorage(app);
   

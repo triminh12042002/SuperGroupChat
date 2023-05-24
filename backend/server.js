@@ -16,7 +16,8 @@ wss.on('connection', ws => {
 
     ws.on('close', message => {
         console.log(message)
-        handleMessage({event: 'room', action: 'leave'}, ws);
+        handleMessage({event: 'room', action: 'leave', roomId: null, 
+        userId: null}, ws);
     })
 });
 
