@@ -35,11 +35,20 @@ export default function CreateNewGroupChat() {
     }
 
     return (
-        <div >
-            <form className='mt-4 m-auto'>
-                <input onChange={(e) => setGroupName(e.target.value)} placeholder='your group name' value={groupName} />
-                <button onClick={createNewGroupChat}>Create new group chat</button>
-            </form>
+        // <div >
+        //     <form className='mt-4 m-auto'>
+        //         <input onChange={(e) => setGroupName(e.target.value)} placeholder='your group name' value={groupName} />
+        //         <button onClick={createNewGroupChat}>Create new group chat</button>
+        //     </form>
+        // </div>
+
+        <div className="form-control">
+            <div className="input-group">
+                <input type="text" placeholder="Your group name"  onChange={(e) => setGroupName(e.target.value)} value={groupName} className="input input-bordered" />
+                <button className="btn" onClick={createNewGroupChat}>
+                    Create new group chat
+                </button>
+            </div>
         </div>
     )
 }

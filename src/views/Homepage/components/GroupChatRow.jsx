@@ -9,10 +9,11 @@ export default function GroupChatRow({ group }) {
     }
     
     return (
-        <Link to={'/groups/' + group.id} className='flex bg-gray-400 p-4 my-4 gap-2 w-2/5 m-auto cursor-pointer'>
-            {'Group:'}
-            <h1 className='text-2xl'>{group?.name}</h1>
-            {/* <h4>{group?.admin}</h4> */}
-        </Link>
+        <li className="hover-bordered">
+            <Link to={'/groups/' + group.id}>
+                {'Group:'}
+                <h1 className='text-2xl'>{group?.name}</h1>
+            </Link>
+        </li>
     )
 }

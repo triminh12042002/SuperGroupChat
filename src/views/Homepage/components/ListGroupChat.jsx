@@ -25,10 +25,11 @@ export default function ListGroupChat() {
     // useEffect (); 
 
     return (
-        <div >
+        <ul className="menu bg-base-100 w-80">
             {groups?.length > 0 && groups.map((group) => (
                 <GroupChatRow group={group} key={group.id} />
             ))}
-        </div>
+        </ul>
+
     )
 }

@@ -1,4 +1,4 @@
-
+/* 
 body {
   background-color: #84aaf5;
 }
@@ -56,8 +56,6 @@ main::-webkit-scrollbar-thumb {
 }
 
 form {
-  /* height: 10vh; */
-  /* position: fixed; */
   bottom: 0;
   background-color: rgb(24, 23, 23);
   width: 100%;
@@ -67,7 +65,6 @@ form {
 }
 
 form button {
-  /* width: 20%; */
   background-color: rgb(56, 56, 143);
 }
 
@@ -84,7 +81,7 @@ input {
 }
 
 button {
-  background-color: #282c34; /* Green */
+  background-color: #282c34;
   border: none;
   color: white;
   padding: 15px 32px;
@@ -152,4 +149,4 @@ img {
   height: 40px;
   border-radius: 50%;
   margin: 2px 5px;
-}
+} */
