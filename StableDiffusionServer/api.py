@@ -27,19 +27,19 @@ pipe.to(device)
 # torch_dtype: The torch data type to use for computations. In this case, you can set it to torch.float32 to use 32-bit floating-point precision.
 # device: The device on which you want to run the inference. By setting it to "cpu", you ensure that the computation will be performed on the CPU.
 
-def generate_image(promt):
-    image = pipe(promt, guidance_scale=7.5, num_inference_steps=2).images[0]
+def generate_image(prompt):
+    image = pipe(prompt, guidance_scale=7.5, num_inference_steps=2).images[0]
     return image
 
 @app.get("/")
-def generate(promt: str):
+def generate(prompt: str):
     # with autocast(device):
     # Create a pool of worker processes
     # pool = multiprocessing.Pool()
 
     # Map the prompts to the worker processes
-    # image = pool.map(generate_image, promt)
-    image = pipe(promt, guidance_scale=7.5, num_inference_steps=2).images[0]
+    # image = pool.map(generate_image, prompt)
+    image = pipe(prompt, guidance_scale=7.5, num_inference_steps=1).images[0]
 
     # pool.close()
     # pool.join()
@@ -50,6 +50,6 @@ def generate(promt: str):
 
     image.save("testimg.png")
 
-    return Response(content=imgstr, media_type="image/PNG")
+    return Response(content=imgstr, media_type="image/png")
 
 

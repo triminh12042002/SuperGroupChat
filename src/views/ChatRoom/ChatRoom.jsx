@@ -1,6 +1,6 @@
 // firebase SDK
 import firebase from 'firebase/compat/app'
-
+import axios from 'axios'
 // firebase hooks
 import { useCollectionData } from 'react-firebase-hooks/firestore'
 import { useEffect, useRef, useState } from 'react';
@@ -20,14 +20,31 @@ import { v4 } from 'uuid'
 export default function ChatRoom() {
     const [mode, setMode] = useState(null)
     const { id: roomId } = useParams();
-    const {uid, displayName, photoURL} = auth.currentUser;
+    // const {uid, displayName, photoURL} = auth.currentUser;
+    // we need to check the case auth.currentUser is null because it still not loaded
+    const user = auth.currentUser;
+    let uid, displayName, photoURL;
+
+    if (user) {
+        // User is authenticated, destructure the properties
+        ({ uid, displayName, photoURL } = user);
+    } else {
+        // User is not authenticated, handle the error or set default values
+        // For example, you can set default values like:
+        uid = null;
+        displayName = 'Guest';
+        photoURL = null;
+    }
+
     const socket = new WebSocket("ws://localhost:8080")
     useEffect(() => {
         socket.onopen = () => {
 
-            if(mode != null && mode == false) {
-                socket.send(JSON.stringify({event: 'room', action: 'leave', roomId: roomId, 
-                userId: uid}))
+            if (mode != null && mode == false) {
+                socket.send(JSON.stringify({
+                    event: 'room', action: 'leave', roomId: roomId,
+                    userId: uid
+                }))
             }
         }
     }, [mode]);
@@ -38,13 +55,15 @@ export default function ChatRoom() {
     const query = messageRef.orderBy('createAt');
     const [messages, loadingMessages, error] = useCollectionData(query, { idField: 'id' });
     const [formValue, setFormValue] = useState('');
-
     // upload image
     const [imageUpload, setImageUpload] = useState('');
+    const [prompt, setPrompt] = useState('');
+    const [addPrompt, setAddPrompt] = useState(false);
+    const [image, setImage] = useState(null);
 
     const sendMessage = async (e) => {
         e.preventDefault();
-        
+
         const { uid, photoURL } = auth.currentUser;
 
         const downloadUrl = await uploadImage()
@@ -65,7 +84,7 @@ export default function ChatRoom() {
     //     dummy.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
     //   }, [messages]);
 
-    const uploadImage = async() => {
+    const uploadImage = async () => {
         if (imageUpload) {
             let imageLongName = imageUpload.name + v4();
             const imageRef = ref(storage, `images/${imageLongName}`);
@@ -78,15 +97,25 @@ export default function ChatRoom() {
         return ''
     }
 
-    const handleWatchMode = (event)=>{
+    const handleWatchMode = (event) => {
         event.preventDefault()
-        if(mode == null || mode == false){
+        if (mode == null || mode == false) {
             setMode(true)
             return
         }
         setMode(false)
     }
 
+    const generate = async (promt) => {
+        const result = await axios.get(`http://127.0.0.1:8000/?prompt=${prompt}`);
+        setImage(result.data);
+        console.log(result);
+        console.log('image');
+        console.log(image);
+    }
+    const hanldePromts = () => {
+        generate();
+    }
     return (
         <div >
             {/* nav bar */}
@@ -96,9 +125,9 @@ export default function ChatRoom() {
                 </div>
 
                 <div className="flex-none gap-2">
-                    <div  className="cursor-pointer tooltip tooltip-bottom" data-tip="Watch2Gether" onClick={handleWatchMode}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" className={`${mode ? 'text-green-500' : ''} w-6 h-6`}>
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125z" />
+                    <div className="cursor-pointer tooltip tooltip-bottom" data-tip="Watch2Gether" onClick={handleWatchMode}>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className={`${mode ? 'text-green-500' : ''} w-6 h-6`}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 20.25h12m-7.5-3v3m3-3v3m-10.125-3h17.25c.621 0 1.125-.504 1.125-1.125V4.875c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125z" />
                         </svg>
                     </div>
 
@@ -107,9 +136,9 @@ export default function ChatRoom() {
                     <div className="dropdown dropdown-end dropdown-hover">
                         <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
                             <div className="w-10 rounded-full">
-                            <img src={photoURL} />
+                                <img src={photoURL} />
                             </div>
-                        </label>    
+                        </label>
                         <ul tabIndex={0} className="text-black mt-3 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-100">
                             <li> <GetYourID /></li>
                             <li><SignOut /></li>
@@ -130,18 +159,29 @@ export default function ChatRoom() {
 
                 {/* send */}
                 <div className="bg-gray-200 fixed bottom-0 w-full py-10 shadow-lg">
-                    <form className="input-group containerWrap" onSubmit={sendMessage}>
-                        <input  type="text" placeholder="Send" className="input input-bordered focus:outline-none w-full mx-30" value={formValue} onChange={(e) => setFormValue(e.target.value)}/>
+                    <form className="input-group containerWrap " onSubmit={sendMessage}>
+                        <input type="text" placeholder="Send" className="input input-bordered focus:outline-none w-full mx-30" value={formValue} onChange={(e) => setFormValue(e.target.value)} />
                         <button className="btn btn-square" onClick={uploadImage}>
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-                        </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                            </svg>
                         </button>
-                        <input type="file" className='file-input file-input-ghost' onChange={e => setImageUpload(e.target.files[0])}/>
-
+                        <input type="file" className='file-input file-input-ghost' onChange={e => setImageUpload(e.target.files[0])} />
                     </form>
+                    <div className='input-group containerWrap gap-2 mt-2'>
+                        {addPrompt ? (
+                            <div className='input-group gap-2'>
+                                <input className='p-2 ' onChange={(e) => setPrompt(e.target.value)} placeholder='enter your promt here' value={prompt} />
+                                <button className='bg-white p-2' onClick={generate}>Promts</button>
+                                {image ? <img src={`data:image/png;base64,${image}`} className=' w-60 h-60' />  : null}
+                            </div>
+                        ) :
+                            <button className='bg-white p-2' onClick={() => setAddPrompt(true)}>Add image to message </button>
+                        }
+                    </div>
+
                 </div>
-                
+
                 {/* Watch */}
                 {(mode && uid) && <Watch roomId={roomId} userId={uid} userName={displayName} photoURL={photoURL} socket={socket} mode={mode}></Watch>}
 
