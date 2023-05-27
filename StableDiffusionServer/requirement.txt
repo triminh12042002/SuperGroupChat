@@ -1,3 +1,9 @@
 fastapi
 uvicorn[standard]
 torch
+auth_token
+fastapi import 
+fastapi.middleware.cors 
+diffusers import StableDiffusionPipeline
+io 
+base64

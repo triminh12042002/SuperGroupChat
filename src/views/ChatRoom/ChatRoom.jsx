@@ -15,6 +15,7 @@ import GetYourID from './GetYourID';
 import { storage } from '../../firebase'
 import { ref, uploadBytes, listAll, getDownloadURL } from 'firebase/storage'
 import { v4 } from 'uuid'
+import { updateDoc } from 'firebase/firestore';
 // import { upload } from '@testing-library/user-event/dist/upload';
 
 export default function ChatRoom() {
@@ -60,7 +61,9 @@ export default function ChatRoom() {
     const [prompt, setPrompt] = useState('');
     const [addPrompt, setAddPrompt] = useState(false);
     const [image, setImage] = useState(null);
-
+    const [generatingImage, setGeratingImage] = useState(false);
+    const [promptMessRef, setPromptMessRef] = useState(null);
+    const [updateMess, setUpdateMess] = useState(false);
     const sendMessage = async (e) => {
         e.preventDefault();
 
@@ -68,13 +71,32 @@ export default function ChatRoom() {
 
         const downloadUrl = await uploadImage()
 
-        await messageRef.add({
+        // if (image) {
+        //     setPromptMessRef = null;
+        // }
+
+        const messRef = await messageRef.add({
             text: formValue,
             createAt: firebase.firestore.FieldValue.serverTimestamp(),
             uid,
             photoURL,
-            imageURL: downloadUrl
+            imageURL: downloadUrl,
+            promptImageBase64: image,
         })
+
+        console.log('messRef', messRef);
+
+        // setImage('');
+        // check if current server is busy mean it is processing image and no promt mean the current mess is the one that has prompt
+        if (generatingImage && !promptMessRef) {
+            setPromptMessRef(messRef);
+            console.log('promptMessRef in sendMessage', promptMessRef);
+        }
+        // if (generatingImage == true) {
+        //     setMessageID(messRef.id);
+        // } else {
+        //     alert('Stable Diffusion server is busy now, please try again later');
+        // }
 
         setFormValue('');
         dummy.current.scrollIntoView({ behavior: 'smooth' });
@@ -83,6 +105,18 @@ export default function ChatRoom() {
     // useEffect(() => {
     //     dummy.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
     //   }, [messages]);
+    useEffect(
+        () => {
+            console.log('promptMessRef in useEffect', promptMessRef)
+        }
+        , [promptMessRef]);
+
+    useEffect(
+        () => {
+            if (updateMess)
+                updateMessRef();
+        }, [updateMess]
+    )
 
     const uploadImage = async () => {
         if (imageUpload) {
@@ -106,15 +140,58 @@ export default function ChatRoom() {
         setMode(false)
     }
 
-    const generate = async (promt) => {
-        const result = await axios.get(`http://127.0.0.1:8000/?prompt=${prompt}`);
-        setImage(result.data);
-        console.log(result);
-        console.log('image');
-        console.log(image);
+    const generate = async () => {
+        if (!generatingImage) {
+            setGeratingImage(true);
+            const result = await axios.get(`http://127.0.0.1:8000/?prompt=${prompt}`);
+            setImage(result.data);
+            // console.log(result);
+            console.log('image-result.data in gen');
+            console.log(result.data);
+
+            //////////
+            // console.log('promptMessRef in gen', promptMessRef);
+
+            // const messageSnapshot = await promptMessRef.get();
+            // const messageData = messageSnapshot.data();
+
+            // // Update the message data with the generated image
+            // const updateMess = await updateDoc(promptMessRef, {
+            //     ...messageData,
+            //     promptImageBase64: result.data,
+            // });
+            ////////
+            setUpdateMess(true);
+            console.log('promptMessRef in gen', promptMessRef);
+            // console.log('mess', messRef);
+
+            // add image the the mess that have prompted this 
+
+            // setPromptMessRef(null);
+
+        } else {
+            alert('Stable Diffusion server is busy now, please try again later');
+        }
     }
-    const hanldePromts = () => {
-        generate();
+
+    const updateMessRef = async () => {
+        if (promptMessRef) {
+            console.log('updateMess in updateMessRef');
+            console.log('promptMessRef in updateMessRef', promptMessRef);
+            const updateMess = await updateDoc(promptMessRef, {
+                promptImageBase64: image,
+            })
+            console.log('updateMess in updateMessRef');
+            console.log('updateMess in updateMessRef', updateMess);
+        }
+        // else {
+        //     console.log('no promptMessRef -> no update', promptMessRef);
+        //     alert('Stable Diffusion server is busy now, please try again later');
+        // }
+        setImage('');
+        setGeratingImage(false);
+        setAddPrompt(false);
+        console.log('promptMessRef in updateMessRef', promptMessRef);
     }
     return (
         <div >
@@ -136,7 +213,7 @@ export default function ChatRoom() {
                     <div className="dropdown dropdown-end dropdown-hover">
                         <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
                             <div className="w-10 rounded-full">
-                                <img src={photoURL} />
+                                <img src={photoURL} alt='your image' />
                             </div>
                         </label>
                         <ul tabIndex={0} className="text-black mt-3 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-100">
@@ -171,9 +248,10 @@ export default function ChatRoom() {
                     <div className='input-group containerWrap gap-2 mt-2'>
                         {addPrompt ? (
                             <div className='input-group gap-2'>
-                                <input className='p-2 ' onChange={(e) => setPrompt(e.target.value)} placeholder='enter your promt here' value={prompt} />
+                                <input className='p-2 ' onChange={(e) => setPrompt(e.target.value)} placeholder='enter your prompt here' value={prompt} />
                                 <button className='bg-white p-2' onClick={generate}>Promts</button>
-                                {image ? <img src={`data:image/png;base64,${image}`} className=' w-60 h-60' />  : null}
+                                {image ? <img src={`data:image/png;base64,${image}`} className=' w-60 h-60' /> : null}
+                                {generatingImage && <div className='bg-white p-2'>generating image</div>}
                             </div>
                         ) :
                             <button className='bg-white p-2' onClick={() => setAddPrompt(true)}>Add image to message </button>

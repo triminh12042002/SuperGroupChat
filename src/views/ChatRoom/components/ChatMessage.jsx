@@ -1,7 +1,7 @@
 import { auth } from "../../../firebase";
 
 export default function ChatMessage(props) {
-    const { text, uid, photoURL, imageURL } = props.message;
+    const { text, uid, photoURL, imageURL, promptImageBase64 } = props.message;
     if (!auth.currentUser) {
         return (
             <div>unknown user</div>
@@ -18,6 +18,8 @@ export default function ChatMessage(props) {
             </div>
             <div className="chat-bubble">{text}</div>
             <img src={imageURL} className="w-auto" />
+            {promptImageBase64 && <img src={`data:image/png;base64,${promptImageBase64}`} className="w-40 h-40" />}
+            
         </div>
     )
 }

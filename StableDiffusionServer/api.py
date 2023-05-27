@@ -6,7 +6,6 @@ from torch import autocast
 from diffusers import StableDiffusionPipeline
 from io import BytesIO
 import base64
-import multiprocessing
 
 app = FastAPI()
 
@@ -27,9 +26,9 @@ pipe.to(device)
 # torch_dtype: The torch data type to use for computations. In this case, you can set it to torch.float32 to use 32-bit floating-point precision.
 # device: The device on which you want to run the inference. By setting it to "cpu", you ensure that the computation will be performed on the CPU.
 
-def generate_image(prompt):
-    image = pipe(prompt, guidance_scale=7.5, num_inference_steps=2).images[0]
-    return image
+# def generate_image(prompt):
+#     image = pipe(prompt, guidance_scale=7.5, num_inference_steps=2).images[0]
+#     return image
 
 @app.get("/")
 def generate(prompt: str):
@@ -39,7 +38,7 @@ def generate(prompt: str):
 
     # Map the prompts to the worker processes
     # image = pool.map(generate_image, prompt)
-    image = pipe(prompt, guidance_scale=7.5, num_inference_steps=1).images[0]
+    image = pipe(prompt, guidance_scale=7.5, num_inference_steps=20).images[0]
 
     # pool.close()
     # pool.join()
