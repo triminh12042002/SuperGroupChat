@@ -13,7 +13,9 @@ export default function AddNewMemberToGroupChat({ groupID }) {
 
     async function addNewMember(e) {
         e.preventDefault();
-
+        if(newUID == null || newUID == ""){
+            alert("Please fill in new member ID");
+        }
         await groupRef.update({
             users: firebase.firestore.FieldValue.arrayUnion(newUID),
         })

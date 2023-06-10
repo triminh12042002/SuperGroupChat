@@ -11,7 +11,7 @@ export default function SignIn() {
         <div className="hero-content text-center">
             <div className="max-w-md">
             <h1 className="text-5xl font-bold">Hello there</h1>
-            <p className="py-6">Provident cupiditate voluptatem et in. Quaerat fugiat ut assumenda excepturi exercitationem quasi. In deleniti eaque aut repudiandae et a id nisi.</p>
+            <p className="py-6">A chat app that support user with multiple tool as Watch Together, Stable Diffusion and more in futher</p>
             <button className='btn btn-primary' onClick={signInWithGoogle} >Sign in with Google</button>
             </div>
         </div>

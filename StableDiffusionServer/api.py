@@ -38,7 +38,7 @@ def generate(prompt: str):
 
     # Map the prompts to the worker processes
     # image = pool.map(generate_image, prompt)
-    image = pipe(prompt, guidance_scale=7.5, num_inference_steps=20).images[0]
+    image = pipe(prompt, guidance_scale=7.5, num_inference_steps=1).images[0]
 
     # pool.close()
     # pool.join()

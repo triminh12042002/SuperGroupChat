@@ -10,6 +10,10 @@ run fastapi server:
     uvicorn api:app --reload
 
 kill the uvicorn server:
+    Ctrl + c 2 times
+
+    or
+
     lsof -i :8000
     kill -9 PID
 

@@ -17,8 +17,8 @@ export default function ChatMessage(props) {
                 </div>
             </div>
             <div className="chat-bubble">{text}</div>
-            <img src={imageURL} className="w-auto" />
-            {promptImageBase64 && <img src={`data:image/png;base64,${promptImageBase64}`} className="w-40 h-40" />}
+            {imageURL && <img src={imageURL} className="w-auto h-80 m-2 card" />}
+            {promptImageBase64 && <img src={`data:image/png;base64,${promptImageBase64}`} className="w-auto h-80 m-2 card" />}
             
         </div>
     )

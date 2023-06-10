@@ -1,7 +1,7 @@
 import firebase from 'firebase/compat/app'
 
 import React, { useState } from 'react';
-import { auth, firestore } from '../../firebase'
+import { auth, firestore } from '../../../firebase'
 import { useCollectionData } from 'react-firebase-hooks/firestore'
 const videos = []
 

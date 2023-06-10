@@ -1,21 +1,28 @@
 // firebase SDK
 import firebase from 'firebase/compat/app'
 import axios from 'axios'
+
+
+
 // firebase hooks
 import { useCollectionData } from 'react-firebase-hooks/firestore'
+import { auth, firestore } from '../../firebase'
+import { storage } from '../../firebase'
+import { ref, uploadBytes, listAll, getDownloadURL } from 'firebase/storage'
+import { v4 } from 'uuid'
+import { updateDoc } from 'firebase/firestore';
+
+
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import AddNewMemberToGroupChat from './components/AddNewMemberToGroupChat';
 import ChatMessage from './components/ChatMessage';
 import SignOut from '../SignOut/SignOut';
-import Watch from './Watch';
-import { auth, firestore } from '../../firebase'
-import GetYourID from './GetYourID';
+import GetYourID from './components/GetYourID';
+import Watch from './components/Watch';
+import PromptImage from './components/PromptImage'
 
-import { storage } from '../../firebase'
-import { ref, uploadBytes, listAll, getDownloadURL } from 'firebase/storage'
-import { v4 } from 'uuid'
-import { updateDoc } from 'firebase/firestore';
+
 // import { upload } from '@testing-library/user-event/dist/upload';
 
 export default function ChatRoom() {
@@ -56,14 +63,14 @@ export default function ChatRoom() {
     const query = messageRef.orderBy('createAt');
     const [messages, loadingMessages, error] = useCollectionData(query, { idField: 'id' });
     const [formValue, setFormValue] = useState('');
-    // upload image
-    const [imageUpload, setImageUpload] = useState('');
-    const [prompt, setPrompt] = useState('');
+    // prompt image
     const [addPrompt, setAddPrompt] = useState(false);
+    const [imageUpload, setImageUpload] = useState('');
     const [image, setImage] = useState(null);
     const [generatingImage, setGeratingImage] = useState(false);
     const [promptMessRef, setPromptMessRef] = useState(null);
     const [updateMess, setUpdateMess] = useState(false);
+    
     const sendMessage = async (e) => {
         e.preventDefault();
 
@@ -86,25 +93,24 @@ export default function ChatRoom() {
 
         console.log('messRef', messRef);
 
-        // setImage('');
         // check if current server is busy mean it is processing image and no promt mean the current mess is the one that has prompt
         if (generatingImage && !promptMessRef) {
             setPromptMessRef(messRef);
             console.log('promptMessRef in sendMessage', promptMessRef);
         }
-        // if (generatingImage == true) {
-        //     setMessageID(messRef.id);
-        // } else {
-        //     alert('Stable Diffusion server is busy now, please try again later');
-        // }
 
         setFormValue('');
+        setImage('');
         dummy.current.scrollIntoView({ behavior: 'smooth' });
+        setAddPrompt(false);
+
+
     }
 
     // useEffect(() => {
     //     dummy.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
     //   }, [messages]);
+
     useEffect(
         () => {
             console.log('promptMessRef in useEffect', promptMessRef)
@@ -140,39 +146,7 @@ export default function ChatRoom() {
         setMode(false)
     }
 
-    const generate = async () => {
-        if (!generatingImage) {
-            setGeratingImage(true);
-            const result = await axios.get(`http://127.0.0.1:8000/?prompt=${prompt}`);
-            setImage(result.data);
-            // console.log(result);
-            console.log('image-result.data in gen');
-            console.log(result.data);
-
-            //////////
-            // console.log('promptMessRef in gen', promptMessRef);
-
-            // const messageSnapshot = await promptMessRef.get();
-            // const messageData = messageSnapshot.data();
-
-            // // Update the message data with the generated image
-            // const updateMess = await updateDoc(promptMessRef, {
-            //     ...messageData,
-            //     promptImageBase64: result.data,
-            // });
-            ////////
-            setUpdateMess(true);
-            console.log('promptMessRef in gen', promptMessRef);
-            // console.log('mess', messRef);
-
-            // add image the the mess that have prompted this 
-
-            // setPromptMessRef(null);
-
-        } else {
-            alert('Stable Diffusion server is busy now, please try again later');
-        }
-    }
+    
 
     const updateMessRef = async () => {
         if (promptMessRef) {
@@ -190,7 +164,6 @@ export default function ChatRoom() {
         // }
         setImage('');
         setGeratingImage(false);
-        setAddPrompt(false);
         console.log('promptMessRef in updateMessRef', promptMessRef);
     }
     return (
@@ -210,22 +183,24 @@ export default function ChatRoom() {
 
                     <AddNewMemberToGroupChat groupID={roomId} />
 
-                    <div className="dropdown dropdown-end dropdown-hover">
+                    <div className="dropdown dropdown-end ">
                         <label tabIndex={0} className="btn btn-ghost btn-circle avatar">
                             <div className="w-10 rounded-full">
                                 <img src={photoURL} alt='your image' />
                             </div>
                         </label>
                         <ul tabIndex={0} className="text-black mt-3 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-100">
-                            <li> <GetYourID /></li>
-                            <li><SignOut /></li>
+                            <div> <GetYourID /></div>
+                            
+                            <button><SignOut /></button>
                         </ul>
+                        
                     </div>
                 </div>
             </div>
 
             <div className='pb-44 pt-10 flex flex-row'>
-                {/* chat box */}
+                {/* chat box - list messages */}
 
                 <div className={`${mode ? 'basis-1/4' : 'containerWrap'} overflow-auto h-[65vh]`}>
                     {messages && messages.map(msg => {
@@ -245,19 +220,7 @@ export default function ChatRoom() {
                         </button>
                         <input type="file" className='file-input file-input-ghost' onChange={e => setImageUpload(e.target.files[0])} />
                     </form>
-                    <div className='input-group containerWrap gap-2 mt-2'>
-                        {addPrompt ? (
-                            <div className='input-group gap-2'>
-                                <input className='p-2 ' onChange={(e) => setPrompt(e.target.value)} placeholder='enter your prompt here' value={prompt} />
-                                <button className='bg-white p-2' onClick={generate}>Promts</button>
-                                {image ? <img src={`data:image/png;base64,${image}`} className=' w-60 h-60' /> : null}
-                                {generatingImage && <div className='bg-white p-2'>generating image</div>}
-                            </div>
-                        ) :
-                            <button className='bg-white p-2' onClick={() => setAddPrompt(true)}>Add image to message </button>
-                        }
-                    </div>
-
+                    <PromptImage addPrompt={addPrompt} setAddPrompt={setAddPrompt} image={image} setImage={setImage} generatingImage={generatingImage} setGeratingImage={setGeratingImage} setUpdateMess={setUpdateMess} />
                 </div>
 
                 {/* Watch */}
