@@ -11,6 +11,6 @@ export default function SignOut() {
     }
 
     return auth.currentUser && (
-        <a className="normal-case text-xl" onClick={handleOnClick}>Sign Out</a>
+        <button className="normal-case text-xl bg-gray-200 p-2 rounded-full m-2" onClick={handleOnClick}>Sign Out</button>
     )
 }

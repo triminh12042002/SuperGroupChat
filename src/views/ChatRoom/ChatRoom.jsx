@@ -70,7 +70,7 @@ export default function ChatRoom() {
     const [generatingImage, setGeratingImage] = useState(false);
     const [promptMessRef, setPromptMessRef] = useState(null);
     const [updateMess, setUpdateMess] = useState(false);
-    
+
     const sendMessage = async (e) => {
         e.preventDefault();
 
@@ -146,7 +146,7 @@ export default function ChatRoom() {
         setMode(false)
     }
 
-    
+
 
     const updateMessRef = async () => {
         if (promptMessRef) {
@@ -191,26 +191,29 @@ export default function ChatRoom() {
                         </label>
                         <ul tabIndex={0} className="text-black mt-3 p-2 shadow menu menu-compact dropdown-content bg-base-100 rounded-box w-100">
                             <div> <GetYourID /></div>
-                            
+
                             <button><SignOut /></button>
                         </ul>
-                        
+
                     </div>
                 </div>
             </div>
+            <div className='flex flex-row  justify-center items-center bg-gray-200'>
+                <div className={mode ? 'pb-44 pt-10  flex flex-row px-10 bg-white' : 'pb-44 pt-10 w-2/3 flex flex-row px-10 bg-white'}>
+                    {/* chat box - list messages */}
 
-            <div className='pb-44 pt-10 flex flex-row'>
-                {/* chat box - list messages */}
+                    <div className={`${mode ? 'basis-1/4' : 'containerWrap'} overflow-auto h-[65vh]`}>
+                        {messages && messages.map(msg => {
+                            return <ChatMessage key={msg.id} message={msg} />;
+                        })}
+                        <div className='dum' ref={dummy}></div>
+                    </div>
 
-                <div className={`${mode ? 'basis-1/4' : 'containerWrap'} overflow-auto h-[65vh]`}>
-                    {messages && messages.map(msg => {
-                        return <ChatMessage key={msg.id} message={msg} />;
-                    })}
-                    <div className='dum' ref={dummy}></div>
+                    {/* Watch */}
+                    {(mode && uid) && <Watch roomId={roomId} userId={uid} userName={displayName} photoURL={photoURL} socket={socket} mode={mode}></Watch>}
                 </div>
-
                 {/* send */}
-                <div className="bg-gray-200 fixed bottom-0 w-full py-10 shadow-lg">
+                <div className="bg-slate-400 absolute bottom-0 w-full py-2 shadow-lg">
                     <form className="input-group containerWrap " onSubmit={sendMessage}>
                         <input type="text" placeholder="Send" className="input input-bordered focus:outline-none w-full mx-30" value={formValue} onChange={(e) => setFormValue(e.target.value)} />
                         <button className="btn btn-square" onClick={uploadImage}>
@@ -223,11 +226,13 @@ export default function ChatRoom() {
                     <PromptImage addPrompt={addPrompt} setAddPrompt={setAddPrompt} image={image} setImage={setImage} generatingImage={generatingImage} setGeratingImage={setGeratingImage} setUpdateMess={setUpdateMess} />
                 </div>
 
-                {/* Watch */}
-                {(mode && uid) && <Watch roomId={roomId} userId={uid} userName={displayName} photoURL={photoURL} socket={socket} mode={mode}></Watch>}
-
-
             </div>
+
+
+
+
+
+
         </div>
 
     )
