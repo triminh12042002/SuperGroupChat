@@ -6,6 +6,7 @@ import CreateNewGroupChat from "./components/CreateNewGroupChat";
 import ListGroupChat from "./components/ListGroupChat";
 import GetYourID from "../ChatRoom/components/GetYourID";
 import SignOut from "../SignOut/SignOut";
+import {SignUpFaceId} from "../SignIn/FaceId";
 
 export default function Homepage() {
   const [user] = useAuthState(auth);
@@ -36,6 +37,7 @@ export default function Homepage() {
   return (
     <div className="flex flex-row justify-center h-screen bg-gray-200">
 
+      <SignUpFaceId />
       <div className="px-20 py-10 bg-white">
         <div className="my-4">
           <CreateNewGroupChat />

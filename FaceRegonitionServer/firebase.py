@@ -11,7 +11,4 @@ firebase_admin.initialize_app(cred)
 def generate_custom_token(email):
     user = auth.get_user_by_email(email)
     custom_token = auth.create_custom_token(user.uid)
-    print(custom_token)
-    return user.uid
-
-generate_custom_token('huydh.tech@gmail.com')
+    return custom_token

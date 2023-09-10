@@ -7,9 +7,11 @@ import numpy as np
 from sklearn.neighbors import KNeighborsClassifier
 import pandas as pd
 import joblib
+from flask_cors import CORS
 
 #### Defining Flask App
 app = Flask(__name__)
+CORS(app)
 
 ############# ROUTING FUNCTIONS ##################
 def train_model_from_base64(username, base64_images):
@@ -119,25 +121,28 @@ def login_user():
             return jsonify({"status": "error", "message": str(e)}), 500
 
         data = request.get_json()
-
+        print(124, data)
         if not data:
             return jsonify({"status": "error", "message": "No data provided"}), 400
 
         username = data.get("username")
         images = data.get("images")
         print("Len faces", len(images))
+        print(1)
         if not username or not images:
             return jsonify({"status": "error", "message": "Incomplete data provided"}), 400
         
         faces = []
 
         for base64_image in images:
+            print(138)
             # Your image processing code here
             image_bytes = base64.b64decode(base64_image)
             image = cv2.imdecode(np.frombuffer(image_bytes, np.uint8), -1)
             
             # Check if decoding was successful
             if image is not None:
+                print(145)
                 # Resize the image
                 resized_face = cv2.resize(image, (50, 50))
                 # predict the image by fucntion identify_face and logic
@@ -148,8 +153,12 @@ def login_user():
 
                 identified_person = identify_face(resized_face.reshape(1,-1))[0]
                 # predictedUser = identify_face(faces)
+                print(156)
                 if identified_person == username:
+                    print(158)
                     token = generate_custom_token(identified_person)
+                    token = token.decode('utf-8')
+
                     return jsonify({"status": "success", "message": "Login with face success", "code":1, "token":token}), 200
                 return jsonify({"status": "fail", "message": "Login with face failed","code":2}), 400
 
@@ -157,10 +166,10 @@ def login_user():
                 print("Error: Decoding image failed.")
         print("Len faces", len(faces))
         # identified_person = identify_face(face.reshape(1,-1))[0]
-        predictedUser = identify_face(faces)
-        print(predictedUser)
-        if predictedUser == username:
-            return jsonify({"status": "success", "message": "Login with face success"}), 200
+        # predictedUser = identify_face(faces)
+        # print(predictedUser)
+        # if predictedUser == username:
+        #     return jsonify({"status": "success", "message": "Login with face success"}), 200
         return jsonify({"status": "fail", "message": "Login with face failed"}), 400
 
     except Exception as e:
@@ -171,6 +180,7 @@ def identify_face(facearray):
     print("Len facearray", len(facearray))
     model = joblib.load('static/face_recognition_model.pkl')
     return model.predict(facearray)
+
 def identify_faces(facearray):
     print("Len facearray", len(facearray))
     model = joblib.load('static/face_recognition_model.pkl')
